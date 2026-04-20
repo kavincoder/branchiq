@@ -1,0 +1,81 @@
+/* Portfolio dropdown */
+.port-drop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 200px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  z-index: 300;
+  animation: dropIn 150ms ease;
+}
+.port-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 100ms;
+}
+.port-item:hover { background: var(--bg); }
+.p-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.p-ico.amber  { background: var(--amber-pale); color: var(--amber); }
+.p-ico.green  { background: var(--green-pale); color: var(--green); }
+.p-ico.purple { background: var(--purple-pale); color: var(--purple); }
+
+/* User dropdown */
+.user-drop {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 220px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  padding: 10px 6px 6px;
+  z-index: 300;
+  animation: dropIn 150ms ease;
+}
+.ud-name { font-size: 13px; font-weight: 600; color: var(--text); padding: 0 12px 2px; }
+.ud-role { font-size: 11px; color: var(--text-muted); padding: 0 12px 8px; }
+.ud-sep  { height: 1px; background: var(--border); margin: 4px 0; }
+.ud-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 100ms;
+  width: 100%;
+  background: none;
+  border: 0;
+  text-align: left;
+  font-family: inherit;
+}
+.ud-item:hover { background: var(--bg); color: var(--text); }
+.ud-logout:hover { background: var(--red-pale); color: var(--red); }
+
+@keyframes dropIn {
+  from { opacity: 0; transform: scale(0.97) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
