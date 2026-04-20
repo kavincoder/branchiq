@@ -1,0 +1,59 @@
+/* Last analysis info bar */
+.ai-info-bar {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  padding: 14px 20px; background: white; border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: var(--shadow-sm); margin-bottom: 24px;
+}
+.ai-info-bar .aib-item { display: flex; flex-direction: column; gap: 2px; }
+.ai-info-bar .aib-label { font-size: 11px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+.ai-info-bar .aib-val   { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--text); }
+.ai-info-bar .aib-sep   { width: 1px; height: 36px; background: var(--border); }
+.ai-info-bar .aib-btn   { margin-left: auto; }
+
+/* Anomaly score bar */
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; min-width: 100px; }
+.score-bar      { flex: 1; height: 6px; border-radius: 9999px; background: var(--bg); overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 9999px; }
+
+/* Insights 2-col rows */
+.insights-row { display: grid; grid-template-columns: 62fr 38fr; gap: 16px; margin-bottom: 24px; }
+.insights-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+
+/* Trend alerts */
+.trend-list { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+.trend-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); font-size: 13px; color: var(--text-2); }
+.trend-item.warn { background: var(--amber-pale); border-color: #FDE68A; }
+.trend-item.info { background: #EFF6FF; border-color: #BFDBFE; }
+.trend-item .ti-ico { flex-shrink: 0; margin-top: 1px; }
+.trend-item .ti-pct { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; margin-left: auto; white-space: nowrap; padding-left: 8px; }
+
+/* Dormant accounts */
+.dormant-list { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 16px; }
+.dormant-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+.dormant-item .di-acc  { flex: 1; }
+.dormant-item .di-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.dormant-item .di-num  { font-size: 12px; color: var(--text-2); font-family: 'JetBrains Mono', monospace; }
+.dormant-item .di-days { font-size: 12px; font-weight: 600; color: var(--anomaly); white-space: nowrap; }
+
+/* Monthly comparison cards */
+.mc-grid { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
+.mc-item  { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+.mc-item .mc-label { font-size: 12px; color: var(--text-2); font-weight: 500; flex: 1; }
+.mc-item .mc-vals  { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.mc-item .mc-this  { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--text); }
+.mc-item .mc-chg   { font-size: 11px; font-weight: 600; }
+.mc-item .mc-chg.up   { color: #059669; }
+.mc-item .mc-chg.down { color: var(--anomaly); }
+
+/* Dismiss button */
+.btn-dismiss { height: 28px; padding: 0 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid var(--border); background: white; color: var(--text-2); cursor: pointer; transition: all 120ms; white-space: nowrap; }
+.btn-dismiss:hover { background: var(--red-pale); border-color: #FECACA; color: var(--anomaly); }
+.btn-dismiss.dismissed { background: var(--bg); color: var(--text-muted); cursor: default; border-color: transparent; }
+
+/* AI history table row badges */
+.ai-run-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; background: var(--navy-pale); color: var(--navy); font-family: 'JetBrains Mono', monospace; }
+
+@media (max-width: 1024px) {
+  .insights-row   { grid-template-columns: 1fr; }
+  .insights-row-2 { grid-template-columns: 1fr; }
+}

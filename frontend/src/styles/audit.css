@@ -1,0 +1,14 @@
+/* Action type chips */
+.action-chip { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+.action-chip.create { background: var(--green-pale);  color: #059669; }
+.action-chip.update { background: var(--amber-pale);  color: #D97706; }
+.action-chip.delete { background: var(--red-pale);    color: #DC2626; }
+.action-chip.login  { background: #EFF6FF;             color: #2563EB; }
+.action-chip.export { background: var(--navy-pale);    color: var(--navy); }
+
+/* Table name label */
+.tbl-name { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; background: #F1F5F9; color: var(--text-2); font-family: 'JetBrains Mono', monospace; }
+
+/* Filter clear pill */
+.clear-pill { height: 36px; padding: 0 12px; border-radius: 8px; background: var(--navy-pale); color: var(--navy); border: 0; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 150ms; }
+.clear-pill:hover { background: #C7D7F0; }
