@@ -1,0 +1,53 @@
+/* Delete / confirm modal */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,37,71,0.4);
+  z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(2px);
+  animation: fadein 150ms;
+}
+.modal {
+  background: white; border-radius: 16px; padding: 28px;
+  width: 420px; max-width: 90vw;
+  box-shadow: var(--shadow-xl);
+  animation: modalin 200ms cubic-bezier(.22,.61,.36,1);
+}
+.modal-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--red-pale); color: var(--red);
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin: 0 0 8px; }
+.modal-sub   { font-size: 14px; color: var(--text-2); margin: 0 0 24px; line-height: 1.5; }
+.modal-sub strong { color: var(--text); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+@keyframes fadein  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalin { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Anomaly toggle button */
+.btn-anom-toggle {
+  height: 36px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  border: 1px solid var(--border); background: white; color: var(--text-2);
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  transition: all 150ms; white-space: nowrap;
+}
+.btn-anom-toggle:hover { background: var(--anomaly-pale); border-color: #FECACA; color: var(--anomaly); }
+.btn-anom-toggle.on { background: var(--anomaly-pale); border-color: #FECACA; color: var(--anomaly); }
+
+/* Score bar in table */
+.score-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.score-bar { height: 6px; border-radius: 9999px; background: var(--bg); flex: 1; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 9999px; }
+
+/* Filter clear pill */
+.clear-pill {
+  height: 36px; padding: 0 12px; border-radius: 8px;
+  background: var(--navy-pale); color: var(--navy); border: 0;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: background 150ms;
+}
+.clear-pill:hover { background: #C7D7F0; }
