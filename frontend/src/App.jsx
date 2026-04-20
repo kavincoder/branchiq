@@ -5,6 +5,7 @@ import Dashboard    from './pages/Dashboard.jsx';
 import Export       from './pages/Export.jsx';
 import Transactions from './pages/Transactions.jsx';
 import Loans        from './pages/Loans.jsx';
+import Deposits     from './pages/Deposits.jsx';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useAuth();
@@ -19,6 +20,7 @@ function AppRoutes() {
         <Route path="/dashboard"     element={<Dashboard />} />
         <Route path="/transactions" element={<Transactions />} />
         <Route path="/loans"        element={<Loans />} />
+        <Route path="/deposits"     element={<Deposits />} />
         <Route path="/export"       element={<Export />} />
         {/* Other pages added as they're built */}
         <Route path="/"             element={<Navigate to="/dashboard" replace />} />
