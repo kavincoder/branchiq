@@ -1,0 +1,25 @@
+/* User role badge */
+.role-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+.role-badge.manager { background: var(--navy-pale); color: var(--navy); }
+.role-badge.staff   { background: #F1F5F9;           color: var(--text-2); }
+
+/* Inactive user row */
+.tx-table tbody tr.inactive td { opacity: 0.55; }
+
+/* Confirm modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,37,71,0.4); z-index: 300; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: usr-fadein 150ms; }
+.modal { background: white; border-radius: 16px; padding: 28px; width: 420px; max-width: 90vw; box-shadow: var(--shadow-xl); animation: usr-modalin 200ms cubic-bezier(.22,.61,.36,1); }
+.modal-icon    { width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.modal-title   { font-size: 18px; font-weight: 700; color: var(--text); margin: 0 0 8px; }
+.modal-sub     { font-size: 14px; color: var(--text-2); margin: 0 0 24px; line-height: 1.5; }
+.modal-sub strong { color: var(--text); font-weight: 600; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* Password input wrapper in drawer */
+.pw-field { position: relative; }
+.pw-field input { padding-right: 40px; }
+.pw-field .pw-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: 0; cursor: pointer; color: var(--text-muted); display: flex; padding: 0; }
+.pw-field .pw-toggle:hover { color: var(--text-2); }
+
+@keyframes usr-fadein  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes usr-modalin { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
