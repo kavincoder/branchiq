@@ -10,6 +10,7 @@ import Investments  from './pages/Investments.jsx';
 import AIInsights   from './pages/AIInsights.jsx';
 import Users        from './pages/Users.jsx';
 import AuditLogs    from './pages/AuditLogs.jsx';
+import NotFound     from './pages/NotFound.jsx';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useAuth();
@@ -31,8 +32,9 @@ function AppRoutes() {
         <Route path="/audit-logs"   element={<AuditLogs />} />
         <Route path="/export"       element={<Export />} />
         <Route path="/"             element={<Navigate to="/dashboard" replace />} />
-        <Route path="*"             element={<Navigate to="/dashboard" replace />} />
       </Route>
+      {/* Public 404 — shown for any unknown URL (logged-out or bad path) */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

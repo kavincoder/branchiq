@@ -1,0 +1,27 @@
+# ── NEVER commit these ────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── ML model (auto-regenerated on first /ai/run) ─────────────────────────────
+*.pkl
+*.joblib
+app/services/anomaly_model.pkl
+
+# ── Python cache ──────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import TopNav from '../components/TopNav.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -6,21 +6,19 @@ import {
   IconPlus, IconX, IconEye, IconEyeOff, IconUsers, IconUser, IconCheck,
 } from '../components/icons.jsx';
 import { fmtDate } from '../utils/format.js';
-import { STAFF_LIST } from '../data/mockData.js';
+import { api } from '../api/client.js';
 import '../styles/users.css';
 
 const EMPTY_FORM = { full_name: '', username: '', role: 'staff', password: '' };
-
-function nextUserId(staff) {
-  const nums = staff.map(s => parseInt(s.user_id.split('-')[2]));
-  return `USR-2026-${String(Math.max(...nums) + 1).padStart(4, '0')}`;
-}
 
 export default function Users() {
   const { user } = useAuth();
   if (user?.role !== 'manager') return <Navigate to="/dashboard" replace />;
 
-  const [staff,       setStaff]       = useState(STAFF_LIST);
+  const [staff,       setStaff]       = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [saving,      setSaving]      = useState(false);
+  const [toggling,    setToggling]    = useState(false);
   const [drawerOpen,  setDrawerOpen]  = useState(false);
   const [form,        setForm]        = useState(EMPTY_FORM);
   const [formErr,     setFormErr]     = useState({});
@@ -29,6 +27,13 @@ export default function Users() {
   const [toast,       setToast]       = useState(null);
 
   const showToast = (t, d) => { setToast({ t, d }); setTimeout(() => setToast(null), 3500); };
+
+  useEffect(() => {
+    api.get('/users/')
+      .then(data => setStaff(data))
+      .catch(e => console.error('Users load error:', e))
+      .finally(() => setLoading(false));
+  }, []);
 
   const totalStaff   = staff.length;
   const activeStaff  = staff.filter(s => s.is_active).length;
@@ -39,7 +44,7 @@ export default function Users() {
   const closeDrawer = () => setDrawerOpen(false);
   const setF = (k, v) => { setForm(f => ({ ...f, [k]: v })); setFormErr(e => ({ ...e, [k]: '' })); };
 
-  const saveDrawer = () => {
+  const saveDrawer = async () => {
     const errs = {};
     if (!form.full_name.trim())  errs.full_name  = 'Required';
     if (!form.username.trim())   errs.username   = 'Required';
@@ -48,29 +53,56 @@ export default function Users() {
     if (form.password.length < 8) errs.password  = 'Minimum 8 characters';
     if (Object.keys(errs).length) { setFormErr(errs); return; }
 
-    const parts = form.full_name.trim().split(' ');
-    const initials = parts.map(p => p[0]).join('').toUpperCase().slice(0, 2);
-    const newUser = {
-      user_id:    nextUserId(staff),
-      full_name:  form.full_name.trim(),
-      username:   form.username.trim(),
-      role:       form.role,
-      is_active:  true,
-      created_at: new Date().toISOString(),
-      initials,
-    };
-    setStaff(prev => [...prev, newUser]);
-    showToast('Staff added', `${newUser.full_name} · ${newUser.user_id}`);
-    closeDrawer();
+    setSaving(true);
+    try {
+      const created = await api.post('/users/', {
+        full_name: form.full_name.trim(),
+        username:  form.username.trim(),
+        role:      form.role,
+        password:  form.password,
+      });
+      setStaff(prev => [...prev, created]);
+      showToast('Staff added', `${created.full_name} · ${created.user_id}`);
+      closeDrawer();
+    } catch (e) {
+      if (e.message?.toLowerCase().includes('username')) {
+        setFormErr(err => ({ ...err, username: 'Username already exists' }));
+      } else {
+        showToast('Failed to add staff', e.message);
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const confirmToggle = () => {
+  const confirmToggle = async () => {
     const id = toggleTarget.user_id;
-    setStaff(prev => prev.map(s => s.user_id === id ? { ...s, is_active: !s.is_active } : s));
-    const action = toggleTarget.is_active ? 'deactivated' : 'activated';
-    showToast(`Account ${action}`, toggleTarget.full_name);
-    setToggleTarget(null);
+    const newStatus = !toggleTarget.is_active;
+    setToggling(true);
+    try {
+      const updated = await api.put(`/users/${id}/status`, { is_active: newStatus });
+      setStaff(prev => prev.map(s => s.user_id === id ? updated : s));
+      const action = newStatus ? 'activated' : 'deactivated';
+      showToast(`Account ${action}`, toggleTarget.full_name);
+    } catch (e) {
+      showToast('Update failed', e.message);
+    } finally {
+      setToggling(false);
+      setToggleTarget(null);
+    }
   };
+
+  if (loading) {
+    return (
+      <>
+        <TopNav active="Users" />
+        <main>
+          <div className="title-row"><div><h1>User Management</h1><div className="sub">Loading…</div></div></div>
+          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading users…</div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -79,7 +111,7 @@ export default function Users() {
         <div className="title-row">
           <div>
             <h1>User Management</h1>
-            <div className="sub">19 April 2026 · Branch staff accounts</div>
+            <div className="sub">Branch staff accounts</div>
           </div>
           <div className="actions">
             <button className="btn btn-primary" onClick={openDrawer}>
@@ -204,8 +236,8 @@ export default function Users() {
           </div>
         </div>
         <div className="drawer-foot">
-          <button className="btn btn-secondary" onClick={closeDrawer}>Cancel</button>
-          <button className="btn btn-primary" onClick={saveDrawer}>Add Staff</button>
+          <button className="btn btn-secondary" onClick={closeDrawer} disabled={saving}>Cancel</button>
+          <button className="btn btn-primary" onClick={saveDrawer} disabled={saving}>{saving ? 'Adding…' : 'Add Staff'}</button>
         </div>
       </div>
 
@@ -224,9 +256,9 @@ export default function Users() {
               }
             </div>
             <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={()=>setToggleTarget(null)}>Cancel</button>
-              <button className={`btn ${toggleTarget.is_active ? 'btn-danger' : 'btn-primary'}`} onClick={confirmToggle}>
-                {toggleTarget.is_active ? 'Deactivate' : 'Activate'}
+              <button className="btn btn-secondary" onClick={()=>setToggleTarget(null)} disabled={toggling}>Cancel</button>
+              <button className={`btn ${toggleTarget.is_active ? 'btn-danger' : 'btn-primary'}`} onClick={confirmToggle} disabled={toggling}>
+                {toggling ? 'Updating…' : toggleTarget.is_active ? 'Deactivate' : 'Activate'}
               </button>
             </div>
           </div>
