@@ -26,6 +26,9 @@ class Settings(BaseSettings):
         if not v or v == "postgresql://postgres:yourpassword@localhost:5432/branchiq":
             print("\n❌  DATABASE_URL is not set. Update it in backend/.env\n")
             sys.exit(1)
+        # Render free Postgres gives "postgres://" — SQLAlchemy needs "postgresql://"
+        if v.startswith("postgres://"):
+            v = v.replace("postgres://", "postgresql://", 1)
         return v
 
     @field_validator("SECRET_KEY")
