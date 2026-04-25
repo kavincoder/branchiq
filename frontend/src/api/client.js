@@ -1,7 +1,14 @@
+// In dev (localhost), Vite proxies /api → localhost:8000 (vite.config.js).
+// In production (Vercel), call Render backend directly.
+const API_BASE = window.location.hostname === 'localhost'
+  ? ''
+  : 'https://branchiq-backend.onrender.com';
+
 async function request(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
+  const url = API_BASE ? `${API_BASE}${path}` : `/api${path}`;
 
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(url, {
     method,
     headers,
     credentials: 'include',   // sends httpOnly cookie automatically
