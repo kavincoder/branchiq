@@ -15,7 +15,11 @@ export function AuthProvider({ children }) {
   const login = async (username, password) => {
     try {
       const data = await api.post('/auth/login', { username, password });
-      // Backend sets httpOnly cookie; we only keep display info in localStorage
+      // Store token for Authorization header — works on mobile where cross-origin
+      // cookies (SameSite=None) are blocked by iOS Safari / mobile Chrome ITP.
+      if (data.access_token) {
+        localStorage.setItem('branchiq_token', data.access_token);
+      }
       const userObj = {
         user_id:   data.user_id,
         full_name: data.full_name,
@@ -35,6 +39,7 @@ export function AuthProvider({ children }) {
     try { await api.post('/auth/logout'); } catch { /* best-effort */ }
     setUser(null);
     localStorage.removeItem('branchiq_user');
+    localStorage.removeItem('branchiq_token');
   };
 
   return (

@@ -6,6 +6,12 @@ const API_BASE = window.location.hostname === 'localhost'
 
 async function request(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
+  // Send JWT as Authorization header — required on mobile where cross-origin
+  // SameSite=None cookies are blocked by iOS Safari / Chrome ITP.
+  // Desktop browsers use the httpOnly cookie (set by the backend on login).
+  const token = localStorage.getItem('branchiq_token');
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const url = API_BASE ? `${API_BASE}${path}` : `/api${path}`;
 
   const res = await fetch(url, {
