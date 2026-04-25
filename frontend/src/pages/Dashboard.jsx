@@ -11,7 +11,10 @@ import {
   IconAlertCircle, IconActivity,
 } from '../components/icons.jsx';
 import { fmtINR, fmtINRCompact, fmtDateTime, txnLabel, txnClass } from '../utils/format.js';
-import { PORTFOLIO_BREAKDOWN } from '../data/mockData.js';
+const PORTFOLIO_BREAKDOWN = [
+  { name: 'Loans',       value: 0, color: '#2E6BE6' },
+  { name: 'Investments', value: 0, color: '#F59E0B' },
+];
 import { api } from '../api/client.js';
 import '../styles/dashboard.css';
 
