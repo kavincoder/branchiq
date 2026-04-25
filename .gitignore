@@ -2,7 +2,6 @@
 .env
 .env.*
 !.env.example          # allow example files through
-!frontend/.env.production  # safe to commit — contains only public backend URL
 *.pem
 *.key
 *.cert
