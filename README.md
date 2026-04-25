@@ -15,7 +15,7 @@
 
 A full-stack internal banking tool for branch managers and staff — with real-time AI anomaly detection, complete audit trails, and one-click Excel exports.
 
-[Features](#features) · [Tech Stack](#tech-stack) · [Quick Start](#quick-start) · [Architecture](#architecture) · [API](#api-reference) · [Contributing](#contributing)
+[🌐 Live Demo](https://branchiq-sigma.vercel.app) · [Features](#features) · [Tech Stack](#tech-stack) · [Quick Start](#quick-start) · [Architecture](#architecture) · [API](#api-reference) · [Contributing](#contributing)
 
 </div>
 
