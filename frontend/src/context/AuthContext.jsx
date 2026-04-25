@@ -1,25 +1,38 @@
 import { createContext, useContext, useState } from 'react';
-import { MOCK_CREDENTIALS } from '../data/mockData.js';
+import { api } from '../api/client.js';
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('branchiq_user')) || null; }
-    catch { return null; }
-  });
+// Stores only non-sensitive display metadata — NO token in localStorage
+function loadUser() {
+  try { return JSON.parse(localStorage.getItem('branchiq_user')) || null; }
+  catch { return null; }
+}
 
-  const login = (username, password) => {
-    const found = MOCK_CREDENTIALS[username];
-    if (!found || found.password !== password) {
-      return { success: false, error: 'Invalid username or password' };
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(loadUser);
+
+  const login = async (username, password) => {
+    try {
+      const data = await api.post('/auth/login', { username, password });
+      // Backend sets httpOnly cookie; we only keep display info in localStorage
+      const userObj = {
+        user_id:   data.user_id,
+        full_name: data.full_name,
+        role:      data.role,
+        username,
+        initials:  data.full_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+      };
+      setUser(userObj);
+      localStorage.setItem('branchiq_user', JSON.stringify(userObj));
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message || 'Invalid username or password' };
     }
-    setUser(found.user);
-    localStorage.setItem('branchiq_user', JSON.stringify(found.user));
-    return { success: true };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try { await api.post('/auth/logout'); } catch { /* best-effort */ }
     setUser(null);
     localStorage.removeItem('branchiq_user');
   };

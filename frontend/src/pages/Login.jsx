@@ -1,27 +1,29 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { IconEye, IconEyeOff, IconUser, IconLock, IconShieldCheck, IconBarChart, IconDownload } from '../components/icons.jsx';
+import { IconEye, IconEyeOff, IconUser, IconLock, IconShieldCheck, IconBarChart, IconDownload, IconAlertCircle } from '../components/icons.jsx';
 import '../styles/login.css';
 
 export default function Login() {
   const { login } = useAuth();
   const navigate  = useNavigate();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPw,   setShowPw]   = useState(false);
-  const [error,    setError]    = useState('');
-  const [loading,  setLoading]  = useState(false);
+  const [username,  setUsername]  = useState('');
+  const [password,  setPassword]  = useState('');
+  const [showPw,    setShowPw]    = useState(false);
+  const [error,     setError]     = useState('');
+  const [errorKey,  setErrorKey]  = useState(0); // increment to re-trigger shake
+  const [loading,   setLoading]   = useState(false);
+
+  const showError = (msg) => { setError(msg); setErrorKey(k => k + 1); };
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!username.trim() || !password.trim()) { setError('Please enter both username and password'); return; }
+    if (!username.trim() || !password.trim()) { showError('Please enter both username and password'); return; }
     setError(''); setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
-    const result = login(username.trim(), password);
+    const result = await login(username.trim(), password);
     setLoading(false);
     if (result.success) navigate('/dashboard');
-    else setError(result.error);
+    else showError(result.error || 'Incorrect username or password. Please try again.');
   };
 
   const fill = (u, p) => { setUsername(u); setPassword(p); setError(''); };
@@ -53,7 +55,12 @@ export default function Login() {
           <p className="lb-sub">Sign in to your branch dashboard</p>
 
           <form className="login-form" onSubmit={submit}>
-            {error && <div className="login-error">{error}</div>}
+            {error && (
+              <div key={errorKey} className="login-error">
+                <IconAlertCircle size={15} style={{ flexShrink: 0 }} />
+                {error}
+              </div>
+            )}
 
             <div className="fld">
               <label>Username</label>
@@ -99,11 +106,11 @@ export default function Login() {
 
           <div className="dev-creds">
             <div className="dc-label">Demo credentials</div>
-            <div className="dc-row" style={{ cursor:'pointer' }} onClick={() => fill('arjun.manager','password123')}>
-              Manager → <span>arjun.manager</span> / password123
+            <div className="dc-row" style={{ cursor:'pointer' }} onClick={() => fill('arjun.manager','branchiq123')}>
+              Manager → <span>arjun.manager</span> / branchiq123
             </div>
-            <div className="dc-row" style={{ cursor:'pointer', marginBottom:0 }} onClick={() => fill('priya.staff','password123')}>
-              Staff &nbsp;&nbsp;→ <span>priya.staff</span> / password123
+            <div className="dc-row" style={{ cursor:'pointer', marginBottom:0 }} onClick={() => fill('priya.staff','branchiq123')}>
+              Staff &nbsp;&nbsp;→ <span>priya.staff</span> / branchiq123
             </div>
           </div>
         </div>

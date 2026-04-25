@@ -1,0 +1,54 @@
+version: "3.9"
+
+# Production compose — no source volume mounts, no hot-reload, secure cookie enabled
+# Usage: docker-compose -f docker-compose.prod.yml up --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: branchiq
+      POSTGRES_USER: branchiq
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U branchiq"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    # No port exposure — only backend can reach the DB
+
+  backend:
+    build: ./backend
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://branchiq:${DB_PASSWORD}@db:5432/branchiq
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 120
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://yourdomain.com}
+      ENVIRONMENT: production
+      DB_POOL_SIZE: 10
+      DB_MAX_OVERFLOW: 20
+    # No volume mount — code is baked into the image
+    command: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

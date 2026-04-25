@@ -112,7 +112,28 @@
 .fld-icon .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); background: none; border: 0; cursor: pointer; display: flex; }
 .fld-icon .pw-toggle:hover { color: var(--navy); }
 
-.login-error { background: var(--red-pale); border: 1px solid #FECACA; color: #DC2626; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 500; }
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  15%      { transform: translateX(-6px); }
+  30%      { transform: translateX(6px); }
+  45%      { transform: translateX(-4px); }
+  60%      { transform: translateX(4px); }
+  75%      { transform: translateX(-2px); }
+  90%      { transform: translateX(2px); }
+}
+.login-error {
+  background: var(--red-pale);
+  border: 1px solid #FECACA;
+  color: #DC2626;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: shake 0.45s ease;
+}
 
 .login-btn { width: 100%; height: 48px; background: var(--navy); color: white; border: 0; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 150ms; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
 .login-btn:hover:not(:disabled) { background: var(--navy-dark); }

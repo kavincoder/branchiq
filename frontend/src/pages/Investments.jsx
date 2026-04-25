@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import TopNav from '../components/TopNav.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import {
@@ -6,7 +6,7 @@ import {
   IconTrendLine, IconPercent, IconBarChart, IconChevronLeft, IconChevronRight,
 } from '../components/icons.jsx';
 import { fmtINR, fmtINRCompact, fmtDate } from '../utils/format.js';
-import { INVESTMENTS } from '../data/mockData.js';
+import { api } from '../api/client.js';
 import '../styles/investments.css';
 
 const PAGE_SIZE = 20;
@@ -15,12 +15,31 @@ const EMPTY_FORM = {
   maturity_date: '', expected_return_rate: '', notes: '', status: 'active',
 };
 
+function adaptInvestment(i) {
+  const amount = parseFloat(i.amount);
+  const rate = parseFloat(i.interest_rate);
+  const start = i.start_date;
+  const end = i.end_date;
+  const t = start && end ? (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24 * 365.25) : 0;
+  const expected_maturity_amount = t > 0 ? Math.round(amount * Math.pow(1 + rate / 100, t)) : amount;
+  return {
+    ...i,
+    amount,
+    expected_return_rate: rate,
+    investment_date: start,
+    maturity_date: end,
+    notes: i.note || '',
+    expected_maturity_amount,
+  };
+}
+
 const INV_TYPE_LABEL = { govt_bond: 'Govt Bond', mutual_fund: 'Mutual Fund', fixed_deposit: 'Fixed Deposit' };
 const INV_TYPE_CLASS = { govt_bond: 'govt-bond', mutual_fund: 'mutual-fund', fixed_deposit: 'inv-fd' };
 const STATUS_LABEL   = { active: 'Active', matured: 'Matured', liquidated: 'Liquidated' };
 
 function nextInvId(invs) {
-  const nums = invs.map(i => parseInt(i.investment_id.split('-')[2]));
+  if (!invs.length) return 'INV-2026-0001';
+  const nums = invs.map(i => parseInt(i.investment_id.split('-')[2]) || 0);
   return `INV-2026-${String(Math.max(...nums) + 1).padStart(4, '0')}`;
 }
 
@@ -38,7 +57,10 @@ export default function Investments() {
   const { user } = useAuth();
   const isManager = user?.role === 'manager';
 
-  const [invs, setInvs] = useState(INVESTMENTS);
+  const [invs,    setInvs]    = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving,  setSaving]  = useState(false);
+  const [deleting,setDeleting]= useState(false);
 
   const [search,      setSearch]      = useState('');
   const [typeFilter,  setTypeFilter]  = useState('');
@@ -54,6 +76,13 @@ export default function Investments() {
   const [toast,        setToast]        = useState(null);
 
   const showToast = (t, d) => { setToast({ t, d }); setTimeout(() => setToast(null), 3500); };
+
+  useEffect(() => {
+    api.get('/investments/?limit=500')
+      .then(data => setInvs(data.map(adaptInvestment)))
+      .catch(e => console.error('Investments load error:', e))
+      .finally(() => setLoading(false));
+  }, []);
 
   const activeInvs   = invs.filter(i => i.status === 'active');
   const totalInvested= invs.reduce((s, i) => s + i.amount, 0);
@@ -101,7 +130,7 @@ export default function Investments() {
     [form.amount, form.expected_return_rate, form.investment_date, form.maturity_date]
   );
 
-  const saveDrawer = () => {
+  const saveDrawer = async () => {
     const errs = {};
     const amt  = parseFloat(form.amount);
     const rate = parseFloat(form.expected_return_rate);
@@ -113,47 +142,72 @@ export default function Investments() {
       errs.maturity_date = 'Must be after investment date';
     if (Object.keys(errs).length) { setFormErr(errs); return; }
 
-    const matAmt = calc ? Math.round(calc.maturity) : amt;
-
-    if (drawerMode === 'add') {
-      const newInv = {
-        investment_id:             nextInvId(invs),
-        investment_type:           form.investment_type,
-        amount:                    amt,
-        investment_date:           form.investment_date,
-        expected_return_rate:      rate,
-        expected_maturity_amount:  matAmt,
-        maturity_date:             form.maturity_date,
-        status:                    form.status,
-        notes:                     form.notes,
-      };
-      setInvs(prev => [newInv, ...prev]);
-      showToast('Investment added', `${newInv.investment_id} · ${fmtINR(amt)}`);
-    } else {
-      setInvs(prev => prev.map(i => i.investment_id === editId
-        ? { ...i,
-            investment_type:          form.investment_type,
-            amount:                   amt,
-            investment_date:          form.investment_date,
-            expected_return_rate:     rate,
-            expected_maturity_amount: matAmt,
-            maturity_date:            form.maturity_date,
-            status:                   form.status,
-            notes:                    form.notes,
-          }
-        : i
-      ));
-      showToast('Investment updated', `${editId} · ${fmtINR(amt)}`);
+    setSaving(true);
+    try {
+      if (drawerMode === 'add') {
+        const payload = {
+          investment_id:    nextInvId(invs),
+          investment_type:  form.investment_type,
+          amount:           amt,
+          interest_rate:    rate,
+          start_date:       form.investment_date,
+          end_date:         form.maturity_date,
+          status:           form.status,
+          note:             form.notes,
+          account_number:   'BRANCH-PORTFOLIO',
+          holder_name:      'Branch',
+        };
+        const created = await api.post('/investments/', payload);
+        setInvs(prev => [adaptInvestment(created), ...prev]);
+        showToast('Investment added', `${created.investment_id} · ${fmtINR(amt)}`);
+      } else {
+        const payload = {
+          investment_type: form.investment_type,
+          amount:          amt,
+          interest_rate:   rate,
+          start_date:      form.investment_date,
+          end_date:        form.maturity_date,
+          status:          form.status,
+          note:            form.notes,
+        };
+        const updated = await api.put(`/investments/${editId}`, payload);
+        setInvs(prev => prev.map(i => i.investment_id === editId ? adaptInvestment(updated) : i));
+        showToast('Investment updated', `${editId} · ${fmtINR(amt)}`);
+      }
+      closeDrawer(); setPage(1);
+    } catch (e) {
+      showToast('Save failed', e.message);
+    } finally {
+      setSaving(false);
     }
-    closeDrawer(); setPage(1);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     const id = deleteTarget.investment_id;
-    setInvs(prev => prev.filter(i => i.investment_id !== id));
-    setDeleteTarget(null);
-    showToast('Investment deleted', id);
+    setDeleting(true);
+    try {
+      await api.delete(`/investments/${id}`);
+      setInvs(prev => prev.filter(i => i.investment_id !== id));
+      showToast('Investment deleted', id);
+    } catch (e) {
+      showToast('Delete failed', e.message);
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+    }
   };
+
+  if (loading) {
+    return (
+      <>
+        <TopNav active="Investments" />
+        <main>
+          <div className="title-row"><div><h1>Investments</h1><div className="sub">Loading…</div></div></div>
+          <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading investments…</div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>
@@ -162,7 +216,7 @@ export default function Investments() {
         <div className="title-row">
           <div>
             <h1>Investments</h1>
-            <div className="sub">19 April 2026 · Branch investment portfolio</div>
+            <div className="sub">Branch investment portfolio</div>
           </div>
           <div className="actions">
             <button className="btn btn-primary" onClick={openAdd}>
@@ -359,8 +413,10 @@ export default function Investments() {
           )}
         </div>
         <div className="drawer-foot">
-          <button className="btn btn-secondary" onClick={closeDrawer}>Cancel</button>
-          <button className="btn btn-primary" onClick={saveDrawer}>{drawerMode==='edit'?'Save Changes':'Add Investment'}</button>
+          <button className="btn btn-secondary" onClick={closeDrawer} disabled={saving}>Cancel</button>
+          <button className="btn btn-primary" onClick={saveDrawer} disabled={saving}>
+            {saving ? 'Saving…' : drawerMode==='edit' ? 'Save Changes' : 'Add Investment'}
+          </button>
         </div>
       </div>
 
@@ -371,8 +427,8 @@ export default function Investments() {
             <div className="modal-title">Delete Investment?</div>
             <div className="modal-sub">Permanently delete <strong>{deleteTarget.investment_id}</strong> ({fmtINR(deleteTarget.amount)} · {INV_TYPE_LABEL[deleteTarget.investment_type]}). This cannot be undone.</div>
             <div className="modal-actions">
-              <button className="btn btn-secondary" onClick={()=>setDeleteTarget(null)}>Cancel</button>
-              <button className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+              <button className="btn btn-secondary" onClick={()=>setDeleteTarget(null)} disabled={deleting}>Cancel</button>
+              <button className="btn btn-danger" onClick={confirmDelete} disabled={deleting}>{deleting ? 'Deleting…' : 'Delete'}</button>
             </div>
           </div>
         </div>
