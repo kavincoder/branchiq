@@ -40,23 +40,29 @@ function styleSheet(ws, rows) {
       const len = v === null || v === undefined ? 0 : String(v).length;
       return Math.max(max, len);
     }, 0);
-    return { wch: Math.min(Math.max(h.length + 2, maxDataLen + 2), 40) };
+    return { wch: Math.min(Math.max(h.length + 2, maxDataLen + 2), 45) };
   });
   ws['!cols'] = colWidths;
 
-  // ── Freeze top row ────────────────────────────────────────────────────────
-  ws['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activeCell: 'A2', sqref: 'A2' };
+  // ── Row heights: header taller, data rows comfortable ────────────────────
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const rowHeights = [];
+  for (let R = range.s.r; R <= range.e.r; R++) {
+    rowHeights[R] = { hpt: R === 0 ? 22 : 18 };
+  }
+  ws['!rows'] = rowHeights;
+
+  // ── Freeze top row (SheetJS community edition uses !views) ────────────────
+  ws['!views'] = [{ state: 'frozen', xSplit: 0, ySplit: 1, topLeftCell: 'A2' }];
 
   // ── Style each cell ───────────────────────────────────────────────────────
-  const range = XLSX.utils.decode_range(ws['!ref']);
-
   for (let R = range.s.r; R <= range.e.r; R++) {
     for (let C = range.s.c; C <= range.e.c; C++) {
       const cellAddr = XLSX.utils.encode_cell({ r: R, c: C });
       if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
 
       const isHeader = R === 0;
-      const isEvenRow = R % 2 === 0;
+      const isEvenRow = R % 2 === 1; // 0-indexed: row 1,3,5… are even visually
       const colName = headers[C];
       const isNumeric = numericHeaders.has(colName);
 
@@ -73,7 +79,7 @@ function styleSheet(ws, rows) {
             rgb: isHeader
               ? '0F172A'          // navy header
               : isEvenRow
-                ? 'EFF6FF'        // light blue even rows
+                ? 'F1F5F9'        // subtle grey-blue even rows
                 : 'FFFFFF',       // white odd rows
           },
         },
@@ -81,12 +87,13 @@ function styleSheet(ws, rows) {
           horizontal: isHeader ? 'center' : isNumeric ? 'right' : 'left',
           vertical: 'center',
           wrapText: false,
+          indent: isNumeric ? 0 : 1,
         },
         border: {
-          top:    { style: 'thin', color: { rgb: 'CBD5E1' } },
-          bottom: { style: 'thin', color: { rgb: 'CBD5E1' } },
-          left:   { style: 'thin', color: { rgb: 'CBD5E1' } },
-          right:  { style: 'thin', color: { rgb: 'CBD5E1' } },
+          top:    { style: 'thin', color: { rgb: 'E2E8F0' } },
+          bottom: { style: 'thin', color: { rgb: 'E2E8F0' } },
+          left:   { style: 'thin', color: { rgb: 'E2E8F0' } },
+          right:  { style: 'thin', color: { rgb: 'E2E8F0' } },
         },
         numFmt: isNumeric && !isHeader ? '#,##0.00' : undefined,
       };
@@ -258,9 +265,9 @@ function CheckIcon() {
 }
 
 function ExportCard({ card, onDownload }) {
-  const [from, setFrom] = useState('2026-01-01');
-  const [to, setTo]     = useState(today);
-  const [preset, setPreset] = useState(null);
+  const [from, setFrom] = useState('');
+  const [to, setTo]     = useState('');
+  const [preset, setPreset] = useState('All time');
   const [filters, setFilters] = useState(() =>
     Object.fromEntries(card.filters.map(f => [f.key, f.options[0]]))
   );
