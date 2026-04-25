@@ -1,16 +1,34 @@
-# React + Vite
+# BranchIQ — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + Vite 8 frontend for the BranchIQ banking management system.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **React 19** — component UI
+- **Vite 8** — build tool and dev server
+- **Recharts** — dashboard charts
+- **SheetJS** — in-browser Excel export
 
-## React Compiler
+## Development
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run dev        # starts on http://localhost:5173
+npm run build      # production build
+npm test           # run Vitest unit tests
+```
 
-## Expanding the ESLint configuration
+## Structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```
+src/
+├── api/client.js          # Centralised HTTP client (all fetch calls go here)
+├── context/AuthContext.jsx # Global auth state (current user, login/logout)
+├── pages/                 # One component per screen
+├── components/            # Shared UI (TopNav, icons)
+└── styles/                # Per-page CSS modules
+```
+
+The frontend proxies all `/api/*` requests to the FastAPI backend at `http://localhost:8000` during development. See `vite.config.js` for proxy config.
+
+See the [root README](../README.md) for full project documentation.
