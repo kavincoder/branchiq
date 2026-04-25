@@ -61,11 +61,14 @@ def login(
     token = create_access_token({"sub": user.user_id, "role": user.role})
 
     # Set httpOnly cookie — JS cannot read this, eliminates XSS token theft
+    # In production, frontend (vercel.app) and backend (onrender.com) are different
+    # domains — requires SameSite=None + Secure so the browser sends the cookie
+    # on cross-origin fetch requests (credentials: 'include').
     response.set_cookie(
         key=COOKIE_NAME,
         value=token,
         httponly=True,
-        samesite="lax",                        # "strict" breaks OAuth; "lax" is correct
+        samesite="none" if settings.is_production else "lax",
         max_age=COOKIE_MAX_AGE,
         secure=settings.is_production,         # True in prod (HTTPS), False in dev
         path="/",
