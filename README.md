@@ -21,6 +21,22 @@ A full-stack internal banking tool for branch managers and staff — with real-t
 
 ---
 
+## Screenshots
+
+| Dashboard | AI Insights |
+|-----------|-------------|
+| ![Dashboard](.github/assets/02_dashboard.png) | ![AI Insights](.github/assets/04_ai_insights.png) |
+
+| Transactions | Loans |
+|-------------|-------|
+| ![Transactions](.github/assets/03_transactions.png) | ![Loans](.github/assets/05_loans.png) |
+
+| Export | Audit Logs |
+|--------|-----------|
+| ![Export](.github/assets/06_export.png) | ![Audit Logs](.github/assets/07_audit_logs.png) |
+
+---
+
 ## Overview
 
 BranchIQ replaces fragmented spreadsheets and paper records with a unified management platform. Every transaction, loan, deposit, and investment is tracked in one place — with a machine learning model watching for suspicious activity in real time.
